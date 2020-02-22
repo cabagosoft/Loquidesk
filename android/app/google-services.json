@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "501237485476",
+    "firebase_url": "https://loquidesk.firebaseio.com",
+    "project_id": "loquidesk",
+    "storage_bucket": "loquidesk.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:501237485476:android:99cd77209738b01afffb31",
+        "android_client_info": {
+          "package_name": "com.loquidesk"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "501237485476-hm1975il0vn0scas8m9qq9pkce1dg3fn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAY02q8E-TvYUGkJ3Kbf1Apl-LlCl0a5lA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "501237485476-hm1975il0vn0scas8m9qq9pkce1dg3fn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
