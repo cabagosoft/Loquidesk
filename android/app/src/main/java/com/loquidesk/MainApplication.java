@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import com.facebook.react.PackageList;
 import com.facebook.react.ReactApplication;
+import com.imagepicker.ImagePickerPackage;
 import io.invertase.firebase.auth.RNFirebaseAuthPackage; // <-- Add this line
 import io.invertase.firebase.firestore.RNFirebaseFirestorePackage;
 import com.facebook.react.ReactNativeHost;
