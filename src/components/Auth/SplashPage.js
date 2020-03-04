@@ -1,21 +1,20 @@
 import React from 'react';
-import {View, Text, ActivityIndicator, StyleSheet, Image} from 'react-native';
-import { Spinner } from '@ui-kitten/components'
+import {View, StyleSheet, Image} from 'react-native';
 import firebase from 'react-native-firebase';
 
 export default class SplashPage extends React.Component {
+
   componentDidMount() {
     setTimeout(() => {
       firebase.auth().onAuthStateChanged(user => {
         this.props.navigation.navigate(user ? 'Home' : 'Login');
       });
-    }, 3000);
+    }, 2000);
   }
   render() {
     return (
       <View style={styles.container}>
-        <Image source={require('../../../../src/Images/logo2.png')} style={styles.imageUp}/>
-        <Spinner size="giant" />
+        <Image source={require('../../../src/Images/logo2.png')} style={styles.imageUp}/>
       </View>
     );
   }
@@ -25,11 +24,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: "#000000"
+    backgroundColor: "#ffbb00"
   },
   imageUp:{
-    marginBottom: 50,
-    width: 200,
-    height: 120
+    marginBottom: 30,
+    width: 280,
+    height: 160
  }
 });

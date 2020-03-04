@@ -4,13 +4,13 @@ import { mapping, dark as darkTheme } from '@eva-design/eva';
 import { default as appTheme } from './custom-theme.json';
 import { default as customMapping } from './custom-mapping.json';
 import { EvaIconsPack } from '@ui-kitten/eva-icons';
-import RootNavigator from './src/Modules/Navigation/Components/RootNavigator';
-
+import RootNavigator from './src/components/Navigation/RootNavigator';
 
 
 const theme = { ...darkTheme, ...appTheme };
 
 const App = () => (
+
   <React.Fragment>
       <IconRegistry icons={EvaIconsPack}/>
       <ApplicationProvider 
@@ -20,7 +20,6 @@ const App = () => (
       >
         <RootNavigator/>
       </ApplicationProvider>
-  
   </React.Fragment>
 
 );

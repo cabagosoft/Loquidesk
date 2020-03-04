@@ -9,7 +9,7 @@ import firebase from 'react-native-firebase';
 
 
 export default class Login extends React.Component {
-  
+ 
   state = {email: '', password: '', errorMessage: null};
   
   handleLogin = () => {
@@ -18,7 +18,7 @@ export default class Login extends React.Component {
         .auth()
         .signInWithEmailAndPassword(this.state.email, this.state.password)
         .then(() => this.props.navigation.navigate('Home'))
-        .catch(error => this.setState({errorMessage: error.message}));
+        .catch(error => this.setState({errorMessage: ToastAndroid.show('Correo ó contraseña incorrectos', ToastAndroid.LONG)}));
     } else {
       ToastAndroid.show('Llene los campos', ToastAndroid.LONG);
     }
@@ -28,7 +28,7 @@ export default class Login extends React.Component {
 
     return (   
       <Layout style={styles.container}>
-        <Image source={require('../../../../src/Images/logo2.png')} style={styles.imageUp}/>
+        <Image source={require('../../../src/Images/logo2.png')} style={styles.imageUp}/>
         <Input
           style={styles.textInput}
           value={this.state.email} 

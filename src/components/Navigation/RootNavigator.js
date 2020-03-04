@@ -1,8 +1,8 @@
 import React from 'react';
 import { NavigationContainer} from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import Login from '../../Auth/Components/Login'
-import SplashPage from '../../Auth/Components/SplashPage';
+import { createStackNavigator, CardStyleInterpolators, TransitionPresets} from '@react-navigation/stack';
+import Login from '../Auth/Login'
+import SplashPage from '../Auth/SplashPage';
 import BottomNavigator from './BottomNavigator';
 
 
@@ -13,8 +13,10 @@ function RootNavigator() {
     <NavigationContainer>
       <Stack.Navigator  
         screenOptions={{
-          headerShown: false
+          headerShown: false,
         }}
+        headerMode='float'
+        animation='fade'
         initialRouteName="SplashPage"
       >
         <Stack.Screen name="SplashPage" component={SplashPage}  />

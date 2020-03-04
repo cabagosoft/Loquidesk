@@ -1,32 +1,41 @@
 import React from 'react';
-import { StyleSheet, View, Image, TouchableOpacity} from 'react-native';
+import { StyleSheet, View, Image, ToastAndroid, Platform} from 'react-native';
 import { Layout, Input, Button, Text} from '@ui-kitten/components';
 import ImagePicker from 'react-native-image-picker';
 import firebase from 'react-native-firebase';
-import Autocomplete from './Autocomplete';
-import ImagePickerTicket from '../../Camera/components/ImagePickerTicket';
+import Select2 from "react-native-select-two";
+
 
 class NewTicket extends React.Component {
-  
+  _isMounted = false;  
   state = { 
-    filepath: {
-      data: '',
-      uri: ''
-    },
     fileData: '',
     fileUri: '',
+    filePath: '',
     title: '',
     description: '', 
-    pointSale: '',
     date: '',
-    stateTicket: ''
-    
+    stateTicket: '',
+    image:null,
+    pointSale: '',
+    points: [],
+    images: [],
   };
 
   ref = firebase.firestore().collection('Casos')
  
-  componentDidMount() {
-
+  async componentDidMount() {
+    this._isMounted = true;
+    await firebase.firestore().collection('PuntosVenta').get().then((snapshot) => (
+        snapshot.forEach((doc) => (
+        this.setState((prevState) => ({
+          points: [...prevState.points, {
+              id: doc.id,
+              name: doc.data().nombre,
+          }]
+        }))
+      ))
+    ));
     var date = new Date().getDate();
     var month = new Date().getMonth() + 1;
     var year = new Date().getFullYear();
@@ -35,12 +44,32 @@ class NewTicket extends React.Component {
     this.setState({
       date:
         date + '/' + month + '/' + year + ' ' + hours + ':' + min,
-      stateTicket: 'ABIERTO'
+      stateTicket: 'ABIERTO',
     });
-    
   }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  getFileLocalPath = response => {
+    const { path, uri } = response;
+    return Platform.OS === 'android' ? path : uri;
+  };
+
+  createStorageReferenceToFile = response => {
+    const { fileName } = response;
+    return firebase.storage().ref(fileName);
+  };
+  
+  uploadFileToFireBase = imagePickerResponse => {
+    const fileSource = this.getFileLocalPath(imagePickerResponse);
+    const storageRef = this.createStorageReferenceToFile(imagePickerResponse);
+    return storageRef.putFile(fileSource);
+  };
+
   launchCamera = () => {
-    let options = {
+    const options = {
       storageOptions: {
         skipBackup: true,
         path: 'LoquiDesk',
@@ -58,7 +87,11 @@ class NewTicket extends React.Component {
         alert(response.customButton);
       } else {
         const source = { uri: response.uri };
-        console.log('response', JSON.stringify(response));
+        console.log(
+          'My file storage reference is: ',
+          this.createStorageReferenceToFile(response)
+        );
+        Promise.resolve(this.uploadFileToFireBase(response));
         this.setState({
           filePath: response,
           fileData: response.data,
@@ -66,7 +99,6 @@ class NewTicket extends React.Component {
         });
       }
     });
-
   }
 
   launchImageLibrary = () => {
@@ -105,7 +137,7 @@ class NewTicket extends React.Component {
         style={styles.images}
       />
     } else {
-      return <Image source={require('../../../Images/addImage.png')}
+      return <Image source={require('../../Images/add.png')}
         style={styles.images}
       />
     }
@@ -119,38 +151,60 @@ class NewTicket extends React.Component {
       />
     } else {
       return <Image
-        source={require('../../../Images/logo2.png')}
+        source={require('../../Images/logo2.png')}
         style={styles.images}
       />
     }
   }
 
   saveTicket = () => {
-    const { title, description, pointSale, date} = this.state;
+    if (this.state.title && this.state.pointSale) {
+      this.ref.add({
+        titulo: this.state.title,
+        descripcion: this.state.description,
+        puntoVenta: this.state.pointSale,
+        fecha: this.state.date,
+        estado: this.state.stateTicket,
+        imagen: this.state.fileUri
+      })
+      .then(() => this.props.navigation.navigate('Lista'))
+      ToastAndroid.show('Caso creado con éxito', ToastAndroid.LONG);
 
-    this.ref.add({
-      titulo: this.state.title,
-      descripcion: this.state.description,
-      puntoVenta: this.state.pointSale,
-      fecha: this.state.date,
-      estado: this.state.stateTicket
-    })
+    } else {
+      ToastAndroid.show('Llene todos los campos', ToastAndroid.LONG);
+    }  
   }
-
   
   render() {
 
     return (   
+ 
       <Layout style={styles.container}>
         <View style={styles.ImageSections}>
           <View>
             {this.renderFileData()}
           </View>
-          {/*<View>
-            {this.renderFileUri()}
-            <Text style={{textAlign:'center'}}>File Uri</Text>
-          </View>*/}
         </View>
+
+        <Select2
+          isSelectSingle
+          style={styles.inputPV}
+          colorTheme="#FFBB00"
+          popupTitle="Seleccione un punto de venta"
+          searchPlaceHolderText="Busca un punto. Ej: Unico1"
+          listEmptyTitle="No se encontró este punto"
+          selectButtonText="Aceptar"
+          cancelButtonText="Cancelar"
+          title="Punto De Venta"
+          data={this.state.points}
+          onSelect={pointSale => {
+            this.setState({pointSale})
+          }}
+          onRemoveItem={pointSale => {
+            this.setState({pointSale})
+          }}
+        />
+        
         <Input
           name="titulo"
           style={styles.textInput}
@@ -158,8 +212,6 @@ class NewTicket extends React.Component {
           placeholder='Título'
           onChangeText={(title) => this.setState({title})}
         />
-
-        <Autocomplete/>
         <Input
           name="descripcion"
           style={styles.textInput}
@@ -168,7 +220,7 @@ class NewTicket extends React.Component {
           onChangeText={(description) => this.setState({description})}
         /> 
         <View style={styles.body}>
-          <Text style={{textAlign:'center',fontSize:15,marginBottom:10}} >Añadir imágen</Text>
+          
           <View style={styles.btnParentSection}>
             <Button status='info' onPress={this.launchCamera} style={styles.btnSection1}>
               Abrir Cámara
@@ -179,9 +231,10 @@ class NewTicket extends React.Component {
             </Button>
           </View>
         </View>
+ 
         <Button 
           onPress={this.saveTicket}
-          style={styles.buttonLogin}
+          style={styles.buttonTicket}
           size="large"
         >
           Crear Ticket
@@ -199,11 +252,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  buttonLogin: {
+  buttonTicket: {
     width: '90%',
     textAlign:'center',
     fontSize: 50,
-    marginTop: 10
+    marginTop: 50
   },
   inputContainer:{
     backgroundColor: "red",
@@ -223,14 +276,12 @@ const styles = StyleSheet.create({
   ImageSections: {
     display: 'flex',
     flexDirection: 'row',
-    justifyContent: 'center',
     marginBottom:18,
   },
   images: {
-    width: 150,
-    height: 150,
-    marginHorizontal: 3,
-    borderRadius: 15
+    width: 120,
+    height: 120,
+    marginBottom: 10,
   },
   btnParentSection: {
     flexDirection: "row"
@@ -248,7 +299,13 @@ const styles = StyleSheet.create({
     borderRadius: 3,
     textAlign: "center"
   },
-
+  inputPV: {
+    width:'90%',
+    marginBottom: 10,
+    borderRadius: 5,
+    borderColor: "#141414",
+    backgroundColor:"#292929",
+  }
 
 });
 

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { FlatList, View, Text, TextInput, StyleSheet, Appbar} from 'react-native';
+import { FlatList, StyleSheet} from 'react-native';
 import {Button} from '@ui-kitten/components'
 import firebase from 'react-native-firebase';
 import Todo from './Todo'
-import { BottomNavigationHome } from '../../Navigation/Components/RootNavigator';
+import { BottomNavigationHome } from '../Navigation/RootNavigator';
 // create a component
 
 function ListTickets({navigation}){
@@ -11,7 +11,7 @@ function ListTickets({navigation}){
    const [ currentUser, setcurrentUser ] = useState('null');
    const [ loading, setLoading ] = useState(true);
    const [ todos, setTodos ] = useState([]);
-   const ref = firebase.firestore().collection('Casos');
+   const ref = firebase.firestore().collection('Casos').orderBy('fecha', 'DESC');
 
    useEffect(() => {
       const {currentUser} = firebase.auth();
@@ -19,13 +19,14 @@ function ListTickets({navigation}){
       return ref.onSnapshot(querySnapshot => {
         const list = [];
         querySnapshot.forEach(doc => {
-          const {  descripcion, titulo, estado, fecha } = doc.data();
+          const {  descripcion, titulo, estado, fecha, imagen } = doc.data();
           list.push({
             id: doc.id,
             titulo,
             descripcion,
             estado,
-            fecha
+            fecha,
+            imagen
           });
         });
   
@@ -39,8 +40,7 @@ function ListTickets({navigation}){
 
    return (
       <>
-         
-         
+     
          <FlatList 
             style={{flex: 1}}
             data={todos}

@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
 import firebase from 'react-native-firebase';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Image} from 'react-native';
 import { Card, CardHeader, Text } from '@ui-kitten/components';
 
-function Todo({ id, titulo, estado, descripcion, puntoVenta, fecha, navigation}) {
+function Todo({ id, titulo, estado, descripcion, puntoVenta, fecha, imagen}) {
 
    async function toggleComplete() {
     await firebase.firestore()
@@ -13,20 +13,15 @@ function Todo({ id, titulo, estado, descripcion, puntoVenta, fecha, navigation})
         titulo: titulo,
         estado: estado,
         descripcion: descripcion,
-        puntoVenta: puntoVenta,
-        fecha: fecha
+        puntoVenta: puntoVenta[1],
+        fecha: fecha,
+        imagen: imagen
       });
-   }
-
-   const changeColor = () => {
-      if (estado === "ABIERTO") {
-         status="success"
-      } 
    }
 
    const Header = () => (
       <CardHeader
-        title={titulo}
+        title={puntoVenta}
         description={estado + '  el' + '  '+fecha}
       />
    );
@@ -34,7 +29,7 @@ function Todo({ id, titulo, estado, descripcion, puntoVenta, fecha, navigation})
    return (
       <>
       <Card style={styles.cardTicket} header={Header} >
-         <Text>{descripcion}</Text>
+      <Text>{puntoVenta}</Text>
       </Card>
       </>
    );
