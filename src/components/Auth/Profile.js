@@ -7,7 +7,9 @@ import firebase from 'react-native-firebase';
 class Profile extends Component{
    render() {
       return(
-         <Text>Proof</Text>
+         <Button style={styles.buttonLogin} onPress={() => firebase.auth().signOut()}>
+            Cerrar Sesión
+         </Button>
       );
    }
 }

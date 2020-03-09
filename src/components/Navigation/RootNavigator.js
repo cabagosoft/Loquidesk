@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavigationContainer} from '@react-navigation/native';
-import { createStackNavigator, CardStyleInterpolators, TransitionPresets} from '@react-navigation/stack';
+import { createStackNavigator } from '@react-navigation/stack';
 import Login from '../Auth/Login'
 import SplashPage from '../Auth/SplashPage';
 import BottomNavigator from './BottomNavigator';

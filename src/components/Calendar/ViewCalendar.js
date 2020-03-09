@@ -1,88 +1,120 @@
+
 import React, { Component } from 'react';
-import { View } from 'react-native';
-import { Calendar } from 'react-native-calendars';
-import moment from 'moment';
+import { View, Text, StyleSheet, TouchableOpacity, Alert} from 'react-native';
+import { Agenda, LocaleConfig } from 'react-native-calendars';
 
-import CalendarDay from './CalendarDay';
-import CalendarHeader from './CalendarHeader';
 
-let calendarDate = moment();
+LocaleConfig.locales['es'] = {
+  monthNames: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
+  monthNamesShort: ['Ene','Feb','Mar','Abr','May','Jun','Jul.','Ago','Sept','Oct','Nov','Dic'],
+  dayNames: ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes', 'Sábado'],
+  dayNamesShort: ['Dom','Lun','Mar','Mié','Jue','Vie', 'Sáb'],
+  today: 'Hoy'
+};
+LocaleConfig.defaultLocale = 'es';
+
+
 
 class ViewCalendar extends Component {
 
-  constructor(props) {
-    super(props);
 
-    this.state = {
-      calendarDate: calendarDate.format('YYYY-MM-DD'),
-      horizontal: false
-    };
 
-    this.onPressArrowLeft = this.onPressArrowLeft.bind(this);
-    this.onPressArrowRight = this.onPressArrowRight.bind(this);
-    this.onPressListView = this.onPressListView.bind(this);
-    this.onPressGridView = this.onPressGridView.bind(this);
-    this.onDayPress = this.onDayPress.bind(this);
-  }
+  state = {
+    items: {},
+    actualDate: '',
+  };
 
-  onPressArrowLeft() {
-    calendarDate = calendarDate.add(-1, 'month');
-    this.updateCalendarDate();
-  }
-
-  onPressArrowRight() {
-    calendarDate = calendarDate.add(1, 'month');
-    this.updateCalendarDate();
-  }
-
-  onPressListView() {
-    this.setState({ horizontal: true });
-  }
-
-  onPressGridView() {
-    this.setState({ horizontal: false });
-  }
-
-  onDayPress(date) {
-    calendarDate = moment(date.dateString);
-    this.updateCalendarDate();
-  }
-
-  updateCalendarDate() {
+  componentDidMount() {
+    var date = new Date().getDate();
+    var month = new Date().getMonth() + 1;
+    var year = new Date().getFullYear();
     this.setState({
-      calendarDate: calendarDate.format('YYYY-MM-DD')
+      actualDate:
+        date + '/' + month + '/' + year,
     });
   }
 
   render() {
     return (
-      <View style={{ flex: 1 }}>
-        <Calendar
-          current={this.state.calendarDate}
-          dayComponent={CalendarDay}
-          calendarHeaderComponent={CalendarHeader}
-          headerData={{
-            calendarDate: calendarDate.format('DD MMM, YYYY')
-          }}
-          style={{
-            paddingLeft: 0, paddingRight: 0
-          }}
-          onPressArrowLeft={this.onPressArrowLeft}
-          onPressArrowRight={this.onPressArrowRight}
-          onPressListView={this.onPressListView}
-          onPressGridView={this.onPressGridView}
-          markedDates={{
-            '2019-02-23': {soldOut: false, blocked: false, inventory: 2},
-            '2019-02-24': {soldOut: false, blocked: false, inventory: 2},
-            '2019-02-25': {soldOut: false, blocked: true, inventory: 0},
-            '2019-02-26': {soldOut: true, blocked: true, inventory: 2}
-          }}
-          horizontal={this.state.horizontal}
-          onDayPress={this.onDayPress}
-        />
+      <Agenda
+        items={this.state.items}
+        loadItemsForMonth={this.loadItems.bind(this)}
+        selected={this.state.actualDate}
+        renderItem={this.renderItem.bind(this)}
+        renderEmptyDate={this.renderEmptyDate.bind(this)}
+        rowHasChanged={this.rowHasChanged.bind(this)}
+      />
+    );
+  }
+
+  loadItems(day) {
+    setTimeout(() => {
+      for (let i = -15; i < 85; i++) {
+        const time = day.timestamp + i * 24 * 60 * 60 * 1000;
+        const strTime = this.timeToString(time);
+        if (!this.state.items[strTime]) {
+          this.state.items[strTime] = [];
+          const numItems = Math.floor(Math.random() * 5);
+          for (let j = 0; j < numItems; j++) {
+            this.state.items[strTime].push({
+              name: 'Tarea para el día ' + strTime + ' #' + j,
+              height: Math.max(50, Math.floor(Math.random() * 150))
+            });
+          }
+        }
+      }
+      const newItems = {};
+      Object.keys(this.state.items).forEach(key => {newItems[key] = this.state.items[key];});
+      this.setState({
+        items: newItems
+      });
+    }, 1000);
+  }
+
+  renderItem(item) {
+    return (
+      <TouchableOpacity 
+        style={[styles.item, {height: item.height}]} 
+        onPress={() => Alert.alert(item.name)}
+      >
+        <Text>{item.name}</Text>
+      </TouchableOpacity>
+    );
+  }
+
+  renderEmptyDate() {
+    return (
+      <View style={styles.emptyDate}>
+        <Text>No hay tareas asignadas</Text>
       </View>
     );
   }
+
+  rowHasChanged(r1, r2) {
+    return r1.name !== r2.name;
+  }
+
+  timeToString(time) {
+    const date = new Date(time);
+    return date.toISOString().split('T')[0];
+  }
 }
 
+const styles = StyleSheet.create({
+  item: {
+    backgroundColor: 'white',
+    flex: 1,
+    borderRadius: 5,
+    padding: 10,
+    marginRight: 10,
+    marginTop: 17
+  },
+  emptyDate: {
+    height: 15,
+    flex:1,
+    paddingTop: 30
+  }
+});
+
+//make this component available to the app
 export default ViewCalendar;

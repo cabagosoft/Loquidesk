@@ -20,17 +20,17 @@ class NewTicket extends React.Component {
     pointSale: '',
     points: [],
     images: [],
+    priority: '',
   };
 
   ref = firebase.firestore().collection('Casos')
  
   async componentDidMount() {
-    this._isMounted = true;
     await firebase.firestore().collection('PuntosVenta').get().then((snapshot) => (
         snapshot.forEach((doc) => (
         this.setState((prevState) => ({
           points: [...prevState.points, {
-              id: doc.id,
+              id: doc.data().nombre,
               name: doc.data().nombre,
           }]
         }))
@@ -39,11 +39,10 @@ class NewTicket extends React.Component {
     var date = new Date().getDate();
     var month = new Date().getMonth() + 1;
     var year = new Date().getFullYear();
-    var hours = new Date().getHours();
-    var min = new Date().getMinutes();
+   
     this.setState({
       date:
-        date + '/' + month + '/' + year + ' ' + hours + ':' + min,
+        date + '/' + month + '/' + year,
       stateTicket: 'ABIERTO',
     });
   }
@@ -120,7 +119,11 @@ class NewTicket extends React.Component {
         alert(response.customButton);
       } else {
         const source = { uri: response.uri };
-        console.log('response', JSON.stringify(response));
+        console.log(
+          'My file storage reference is: ',
+          this.createStorageReferenceToFile(response)
+        );
+        Promise.resolve(this.uploadFileToFireBase(response));
         this.setState({
           filePath: response,
           fileData: response.data,
@@ -165,10 +168,13 @@ class NewTicket extends React.Component {
         puntoVenta: this.state.pointSale,
         fecha: this.state.date,
         estado: this.state.stateTicket,
-        imagen: this.state.fileUri
+        prioridad: this.state.priority,
+        imagen: this.state.fileUri,
+        asignado_a: '',
+        fechafin: ''
       })
       .then(() => this.props.navigation.navigate('Lista'))
-      ToastAndroid.show('Caso creado con éxito', ToastAndroid.LONG);
+      ToastAndroid.show('Caso creado correctamente, será asignado a un operario de mantenimiento', ToastAndroid.LONG);
 
     } else {
       ToastAndroid.show('Llene todos los campos', ToastAndroid.LONG);
@@ -189,7 +195,7 @@ class NewTicket extends React.Component {
         <Select2
           isSelectSingle
           style={styles.inputPV}
-          colorTheme="#FFBB00"
+          colorTheme="#FFD100"
           popupTitle="Seleccione un punto de venta"
           searchPlaceHolderText="Busca un punto. Ej: Unico1"
           listEmptyTitle="No se encontró este punto"
@@ -203,6 +209,7 @@ class NewTicket extends React.Component {
           onRemoveItem={pointSale => {
             this.setState({pointSale})
           }}
+
         />
         
         <Input
@@ -222,11 +229,11 @@ class NewTicket extends React.Component {
         <View style={styles.body}>
           
           <View style={styles.btnParentSection}>
-            <Button status='info' onPress={this.launchCamera} style={styles.btnSection1}>
+            <Button onPress={this.launchCamera} style={styles.btnSection1}>
               Abrir Cámara
             </Button>
 
-            <Button status='info' onPress={this.launchImageLibrary} style={styles.btnSection2}>
+            <Button onPress={this.launchImageLibrary} style={styles.btnSection2}>
               Ir a galería
             </Button>
           </View>
@@ -291,13 +298,17 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 3,
     marginRight:5,
-    textAlign: "center"
+    textAlign: "center",
+    borderColor:"#ED1C24",
+    backgroundColor: "#ED1C24"
   },
   btnSection2: {
     width: 160,
     height: 50,
     borderRadius: 3,
-    textAlign: "center"
+    textAlign: "center",
+    borderColor:"#ED1C24",
+    backgroundColor: "#ED1C24"
   },
   inputPV: {
     width:'90%',

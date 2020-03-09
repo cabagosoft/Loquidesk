@@ -6,6 +6,7 @@ import com.facebook.react.PackageList;
 import com.facebook.react.ReactApplication;
 import com.imagepicker.ImagePickerPackage;
 import io.invertase.firebase.auth.RNFirebaseAuthPackage; // <-- Add this line
+import io.invertase.firebase.messaging.RNFirebaseMessagingPackage;
 import io.invertase.firebase.firestore.RNFirebaseFirestorePackage;
 import io.invertase.firebase.storage.RNFirebaseStoragePackage;
 import com.facebook.react.ReactNativeHost;
@@ -31,6 +32,7 @@ public class MainApplication extends Application implements ReactApplication {
           packages.add(new RNFirebaseAuthPackage());
           packages.add(new RNFirebaseFirestorePackage());
           packages.add(new RNFirebaseStoragePackage());
+          packages.add(new RNFirebaseMessagingPackage());
           return packages;
         }
 

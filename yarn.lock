@@ -4975,7 +4975,7 @@ mkdirp@^0.5.1:
   dependencies:
     minimist "0.0.8"
 
-moment@^2.24.0:
+moment@^2.22.0, moment@^2.24.0:
   version "2.24.0"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.24.0.tgz#0d055d53f5052aa653c9f6eb68bb5d12bf5c2b5b"
   integrity sha512-bV7f+6l2QigeBBZSM/6yTNq4P2fNpSWj/0e7jQcy87A8e7o2nAfP/34/2ky5Vw4B9S446EtIhodAzkFCcR4dQg==
@@ -5720,6 +5720,13 @@ react-native-calendars@^1.263.0:
     prop-types "^15.5.10"
     xdate "^0.8.0"
 
+react-native-datepicker@^1.7.2:
+  version "1.7.2"
+  resolved "https://registry.yarnpkg.com/react-native-datepicker/-/react-native-datepicker-1.7.2.tgz#58d0822591a0ac9b32aba082650222a0ee29669d"
+  integrity sha1-WNCCJZGgrJsyq6CCZQIioO4pZp0=
+  dependencies:
+    moment "^2.22.0"
+
 react-native-eva-icons@1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/react-native-eva-icons/-/react-native-eva-icons-1.1.0.tgz#323e55d759187edc216d049e7c0012a27383e0ed"
@@ -5752,6 +5759,13 @@ react-native-iphone-x-helper@^1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/react-native-iphone-x-helper/-/react-native-iphone-x-helper-1.2.1.tgz#645e2ffbbb49e80844bb4cbbe34a126fda1e6772"
   integrity sha512-/VbpIEp8tSNNHIvstuA3Swx610whci1Zpc9mqNkqn14DkMbw+ORviln2u0XyHG1kPvvwTNGZY6QpeFwxYaSdbQ==
+
+react-native-material-cards@^1.0.9:
+  version "1.0.9"
+  resolved "https://registry.yarnpkg.com/react-native-material-cards/-/react-native-material-cards-1.0.9.tgz#fe200c3b9551abae346e231c10abea662cec48f7"
+  integrity sha512-TscOwr+oaFqhBfeekQ5YXKV6rZkFvyqKGlxHYaIC4juPAV3qn1k0lOMKS7H9l6ag9jSDeKV6kqpSPOgiL7NQEQ==
+  dependencies:
+    prop-types "^15.5.10"
 
 react-native-modal@^11.5.4:
   version "11.5.4"

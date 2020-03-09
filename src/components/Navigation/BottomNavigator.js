@@ -21,7 +21,7 @@ function BottomNavigator() {
       headerMode='float'
       animation='fade'
       initialRouteName="Nuevo Ticket"
-      activeColor="#FFC300"
+      activeColor="#FFD100"
       inactiveColor="#939393"
       barStyle={{ backgroundColor: '#404040' }}
     >
@@ -34,7 +34,7 @@ function BottomNavigator() {
               name='home-outline'
               width={25}
               height={25}
-              fill={focused ? '#FFC300' : '#939393'}
+              fill={focused ? "#FFD100" : '#939393'}
             />
           )
         }}
@@ -48,13 +48,13 @@ function BottomNavigator() {
               name='calendar-outline'
               width={25}
               height={25}
-              fill={focused ? '#FFC300' : '#939393'}
+              fill={focused ? '#FFD100' : '#939393'}
             />
           )
         }} 
       />
       <Tab.Screen 
-        name="Nuevo Ticket" 
+        name="Nuevo" 
         component={NewTicket}
         options={{
           tabBarIcon: ({ focused }) => (
@@ -62,7 +62,7 @@ function BottomNavigator() {
               name='plus-circle-outline'
               width={25}
               height={25}
-              fill={focused ? '#FFC300' : '#939393'}
+              fill={focused ? "#FFD100" : '#939393'}
             />
           )
         }} 
@@ -76,7 +76,7 @@ function BottomNavigator() {
               name='list-outline'
               width={25}
               height={25}
-              fill={focused ? '#FFC300' : '#939393'}
+              fill={focused ? "#FFD100" : '#939393'}
             />
           )
         }}

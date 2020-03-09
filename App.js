@@ -5,6 +5,7 @@ import { default as appTheme } from './custom-theme.json';
 import { default as customMapping } from './custom-mapping.json';
 import { EvaIconsPack } from '@ui-kitten/eva-icons';
 import RootNavigator from './src/components/Navigation/RootNavigator';
+import PushController from './src/components/Notifications/PushController';
 
 
 const theme = { ...darkTheme, ...appTheme };
