@@ -13,8 +13,7 @@ function ListTickets({navigation}){
    const ref = firebase.firestore().collection('Casos').orderBy('fecha', 'DESC');
 
    useEffect(() => {
-      const {currentUser} = firebase.auth();
-      setcurrentUser({currentUser});
+      
       return ref.onSnapshot(querySnapshot => {
         const list = [];
         querySnapshot.forEach(doc => {

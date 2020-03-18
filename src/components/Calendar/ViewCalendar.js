@@ -1,7 +1,9 @@
 
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, TouchableHighlight} from 'react-native';
 import { Agenda, LocaleConfig } from 'react-native-calendars';
+import firebase from 'react-native-firebase';
+import { Card } from '@ui-kitten/components';
 
 
 LocaleConfig.locales['es'] = {
@@ -17,69 +19,72 @@ LocaleConfig.defaultLocale = 'es';
 
 class ViewCalendar extends Component {
 
-
-
   state = {
-    items: {},
-    actualDate: '',
+
+    actualDate: new Date().toISOString().split("T")[0],
+    dateTicket: '',
+    dueDateTicket: [],
+    pointSale: [],
+    dataTicket: {},
   };
 
-  componentDidMount() {
-    var date = new Date().getDate();
-    var month = new Date().getMonth() + 1;
-    var year = new Date().getFullYear();
+  async componentDidMount() {
+    let queryDB = firebase.firestore().collection('Casos');
+    const snapshot = await queryDB.get();
+    const arrayTickets = snapshot.docs.map(doc => {
+      let data = doc.data();
+      let id = doc.id;
+      return { id, ...data};
+    })
     this.setState({
-      actualDate:
-        date + '/' + month + '/' + year,
+      dataTicket: arrayTickets,
     });
+    const resultDate = this.state.dataTicket.map(a => a.fecha_asignado);
+    this.setState({
+      dateTicket: resultDate,
+    })
+    console.log(this.state.dateTicket)
+    
   }
 
-  render() {
-    return (
-      <Agenda
-        items={this.state.items}
-        loadItemsForMonth={this.loadItems.bind(this)}
-        selected={this.state.actualDate}
-        renderItem={this.renderItem.bind(this)}
-        renderEmptyDate={this.renderEmptyDate.bind(this)}
-        rowHasChanged={this.rowHasChanged.bind(this)}
-      />
-    );
-  }
 
   loadItems(day) {
     setTimeout(() => {
-      for (let i = -15; i < 85; i++) {
-        const time = day.timestamp + i * 24 * 60 * 60 * 1000;
+      //for (let i = 0; i < 2; i++) {// Contador de dias, dia actual -3 dias y +3 dias
+        const time = day.timestamp;
         const strTime = this.timeToString(time);
-        if (!this.state.items[strTime]) {
-          this.state.items[strTime] = [];
-          const numItems = Math.floor(Math.random() * 5);
-          for (let j = 0; j < numItems; j++) {
-            this.state.items[strTime].push({
-              name: 'Tarea para el día ' + strTime + ' #' + j,
-              height: Math.max(50, Math.floor(Math.random() * 150))
+        if (!this.state.dataTicket[this.state.dateTicket]) {
+          this.state.dataTicket[this.state.dateTicket] = [];
+          //const numItems = Math.floor(Math.random() * 5);
+          //for (let j = 0; j < this.state.dataTicket.length; j++) { 
+            this.state.dataTicket[this.state.dateTicket].push({
+            
             });
-          }
+    
+          //}
         }
-      }
-      const newItems = {};
-      Object.keys(this.state.items).forEach(key => {newItems[key] = this.state.items[key];});
-      this.setState({
-        items: newItems
-      });
+        console.log(strTime)
+     //}
     }, 1000);
   }
 
   renderItem(item) {
     return (
-      <TouchableOpacity 
-        style={[styles.item, {height: item.height}]} 
-        onPress={() => Alert.alert(item.name)}
-      >
-        <Text>{item.name}</Text>
-      </TouchableOpacity>
-    );
+      <>
+        {this.state.dataTicket.map(info => (
+          <TouchableOpacity
+            key={info.id}
+            style={[styles.item, {height: item.height}]} 
+            onPress={() => Alert.alert(info.descripcion)}
+          >
+            <Text style={styles.textInfoPV}>{info.puntoVenta}</Text>
+            <Text style={styles.textInfoDescription}>{info.descripcion}</Text>
+            <Text style={styles.textInfoDescription}>{info.fecha_asignado}</Text>
+            <Text style={styles.textInfoDescription}>{info.asignado_a}</Text>
+          </TouchableOpacity>
+        ))}
+      </>
+    )
   }
 
   renderEmptyDate() {
@@ -98,6 +103,24 @@ class ViewCalendar extends Component {
     const date = new Date(time);
     return date.toISOString().split('T')[0];
   }
+
+  render() {
+   
+
+    return (
+      <>
+        <Agenda
+          items={this.state.dataTicket}
+          refreshing={true}
+          loadItemsForMonth={this.loadItems.bind(this)}
+          selected={this.state.actualDate}
+          renderItem={this.renderItem.bind(this)}
+          renderEmptyDate={this.renderEmptyDate.bind(this)}
+          rowHasChanged={this.rowHasChanged.bind(this)}
+        />
+      </>
+    );
+  }
 }
 
 const styles = StyleSheet.create({
@@ -105,7 +128,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     flex: 1,
     borderRadius: 5,
-    padding: 10,
+    padding: 17,
     marginRight: 10,
     marginTop: 17
   },
@@ -113,6 +136,13 @@ const styles = StyleSheet.create({
     height: 15,
     flex:1,
     paddingTop: 30
+  },
+  textInfoPV: {
+    fontSize: 20
+  },
+  textInfoDescription: {
+    fontSize: 15,
+    marginTop: 10
   }
 });
 

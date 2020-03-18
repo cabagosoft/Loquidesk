@@ -3,17 +3,20 @@ import { createMaterialBottomTabNavigator } from '@react-navigation/material-bot
 import { Icon } from '@ui-kitten/components';
 import NewTicket from '../Tickets/NewTicket';
 import ListTickets from '../Tickets/ListTickets';
-import ViewCalendar from '../Calendar/ViewCalendar'
 import Profile from '../Auth/Profile'
 
 
 
 const Tab = createMaterialBottomTabNavigator();
 
-function BottomNavigator() {
+function BottomNavigatorSupervisor() {
   return (
     <Tab.Navigator
-     
+      screenOptions={{
+        headerShown: false,
+        gestureEnabled: true,
+        gestureDirection: 'horizontal',
+      }}
       headerMode='float'
       animation='fade'
       initialRouteName="Nuevo Ticket"
@@ -34,20 +37,6 @@ function BottomNavigator() {
             />
           )
         }}
-      />
-      <Tab.Screen 
-        name="Calendario" 
-        component={ViewCalendar}
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <Icon
-              name='calendar-outline'
-              width={25}
-              height={25}
-              fill={focused ? '#FFD100' : '#939393'}
-            />
-          )
-        }} 
       />
       <Tab.Screen 
         name="Nuevo" 

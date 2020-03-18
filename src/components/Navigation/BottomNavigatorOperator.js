@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import { Icon } from '@ui-kitten/components';
-import NewTicket from '../Tickets/NewTicket';
 import ListTickets from '../Tickets/ListTickets';
 import ViewCalendar from '../Calendar/ViewCalendar'
 import Profile from '../Auth/Profile'
@@ -10,10 +9,14 @@ import Profile from '../Auth/Profile'
 
 const Tab = createMaterialBottomTabNavigator();
 
-function BottomNavigator() {
+function BottomNavigatorOperator() {
   return (
     <Tab.Navigator
-     
+      screenOptions={{
+        headerShown: false,
+        gestureEnabled: true,
+        gestureDirection: 'horizontal',
+      }}
       headerMode='float'
       animation='fade'
       initialRouteName="Nuevo Ticket"
@@ -45,20 +48,6 @@ function BottomNavigator() {
               width={25}
               height={25}
               fill={focused ? '#FFD100' : '#939393'}
-            />
-          )
-        }} 
-      />
-      <Tab.Screen 
-        name="Nuevo" 
-        component={NewTicket}
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <Icon
-              name='plus-circle-outline'
-              width={25}
-              height={25}
-              fill={focused ? "#FFD100" : '#939393'}
             />
           )
         }} 

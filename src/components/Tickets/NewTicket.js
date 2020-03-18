@@ -1,11 +1,13 @@
 import React from 'react';
-import { StyleSheet, View, Image, ToastAndroid, Platform} from 'react-native';
-import { Layout, Input, Button, Text} from '@ui-kitten/components';
+import { StyleSheet, View, Image, ToastAndroid, Platform, TouchableOpacity, KeyboardAvoidingView} from 'react-native';
+import { Layout, Input, Button, Icon} from '@ui-kitten/components';
 import ImagePicker from 'react-native-image-picker';
 import firebase from 'react-native-firebase';
 import Select2 from "react-native-select-two";
 
-
+const NewTicketIcon = (style) => (
+  <Icon {...style} name='file-add-outline'/>
+);
 class NewTicket extends React.Component {
   _isMounted = false;  
   state = { 
@@ -14,7 +16,7 @@ class NewTicket extends React.Component {
     filePath: '',
     title: '',
     description: '', 
-    date: '',
+    date: new Date().toISOString().split("T")[0],
     stateTicket: '',
     image:null,
     pointSale: '',
@@ -36,15 +38,10 @@ class NewTicket extends React.Component {
         }))
       ))
     ));
-    var date = new Date().getDate();
-    var month = new Date().getMonth() + 1;
-    var year = new Date().getFullYear();
-   
     this.setState({
-      date:
-        date + '/' + month + '/' + year,
       stateTicket: 'ABIERTO',
     });
+
   }
 
   componentWillUnmount() {
@@ -67,6 +64,41 @@ class NewTicket extends React.Component {
     return storageRef.putFile(fileSource);
   };
 
+  chooseImage = () => {
+    let options = {
+      title: 'Seleccionar Una Imágen',
+      cancelButtonTitle:'Cancelar',
+      takePhotoButtonTitle:'Abrir Cámara',
+      chooseFromLibraryButtonTitle:'Desde la galería',
+      storageOptions: {
+        skipBackup: true,
+        path: 'LoquiDesk',
+      },
+    };
+    ImagePicker.showImagePicker(options, (response) => {
+      console.log('Response = ', response);
+
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.error) {
+        console.log('ImagePicker Error: ', response.error);
+      } else if (response.customButton) {
+        console.log('User tapped custom button: ', response.customButton);
+        alert(response.customButton);
+      } else {
+        const source = { uri: response.uri };
+        console.log(
+          'My file storage reference is: '
+        );
+        Promise.resolve(this.uploadFileToFireBase(response));
+        this.setState({
+          filePath: response,
+          fileData: response.data,
+          fileUri: response.uri
+        });
+      }
+    });
+  }
   launchCamera = () => {
     const options = {
       storageOptions: {
@@ -170,8 +202,6 @@ class NewTicket extends React.Component {
         estado: this.state.stateTicket,
         prioridad: this.state.priority,
         imagen: this.state.fileUri,
-        asignado_a: '',
-        fechafin: ''
       })
       .then(() => this.props.navigation.navigate('Lista'))
       ToastAndroid.show('Caso creado correctamente, será asignado a un operario de mantenimiento', ToastAndroid.LONG);
@@ -181,71 +211,78 @@ class NewTicket extends React.Component {
     }  
   }
   
+  
   render() {
 
     return (   
  
-      <Layout style={styles.container}>
-        <View style={styles.ImageSections}>
-          <View>
-            {this.renderFileData()}
-          </View>
-        </View>
-
-        <Select2
-          isSelectSingle
-          style={styles.inputPV}
-          colorTheme="#FFD100"
-          popupTitle="Seleccione un punto de venta"
-          searchPlaceHolderText="Busca un punto. Ej: Unico1"
-          listEmptyTitle="No se encontró este punto"
-          selectButtonText="Aceptar"
-          cancelButtonText="Cancelar"
-          title="Punto De Venta"
-          data={this.state.points}
-          onSelect={pointSale => {
-            this.setState({pointSale})
-          }}
-          onRemoveItem={pointSale => {
-            this.setState({pointSale})
-          }}
-
-        />
+    
         
-        <Input
-          name="titulo"
-          style={styles.textInput}
-          value={this.state.title} 
-          placeholder='Título'
-          onChangeText={(title) => this.setState({title})}
-        />
-        <Input
-          name="descripcion"
-          style={styles.textInput}
-          value={this.state.description} 
-          placeholder='Descripción'
-          onChangeText={(description) => this.setState({description})}
-        /> 
-        <View style={styles.body}>
-          
-          <View style={styles.btnParentSection}>
-            <Button onPress={this.launchCamera} style={styles.btnSection1}>
-              Abrir Cámara
-            </Button>
+      <Layout style={styles.container}>
+        <KeyboardAvoidingView
+        style={styles.form}
+        behavior="padding"
+        >
+          <View style={styles.ImageSections}>
+            <View>
+              <TouchableOpacity onPress={this.chooseImage}>
+                {this.renderFileData()} 
+              </TouchableOpacity>
+            </View>
+          </View>
+          <View>
+            <Select2
+              isSelectSingle
+              style={styles.inputPV}
+              colorTheme="#FFD100"
+              popupTitle="Seleccione un punto de venta"
+              searchPlaceHolderText="Busca un punto. Ej: Unico1"
+              listEmptyTitle="No se encontró este punto"
+              selectButtonText="Aceptar"
+              cancelButtonText="Cancelar"
+              title="Punto De Venta"
+              data={this.state.points}
+              onSelect={pointSale => {
+                this.setState({pointSale})
+              }}
+              onRemoveItem={pointSale => {
+                this.setState({pointSale})
+              }}
 
-            <Button onPress={this.launchImageLibrary} style={styles.btnSection2}>
-              Ir a galería
+            />
+            
+            <Input
+              name="titulo"
+              style={styles.textInput}
+              value={this.state.title} 
+              placeholder='Título'
+              onChangeText={(title) => this.setState({title})}
+            />
+            <Input
+              name="descripcion"
+              style={styles.textInputDesc}
+              value={this.state.description} 
+              size='large'
+              multiline={true}
+              maxLength={200}
+              placeholder='Descripción'
+              onChangeText={(description) => this.setState({description})}
+            /> 
+    
+            <Button 
+              onPress={this.saveTicket} 
+              status='primary' 
+              appearance='filled'
+              icon={NewTicketIcon}
+            >
+              Crear Ticket
             </Button>
           </View>
-        </View>
- 
-        <Button 
-          onPress={this.saveTicket}
-          style={styles.buttonTicket}
-          size="large"
-        >
-          Crear Ticket
-        </Button>
+         
+        </KeyboardAvoidingView>
+
+          
+
       </Layout>
     );
   }
@@ -259,11 +296,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  buttonTicket: {
-    width: '90%',
-    textAlign:'center',
-    fontSize: 50,
-    marginTop: 50
+  form: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   inputContainer:{
     backgroundColor: "red",
@@ -271,6 +307,10 @@ const styles = StyleSheet.create({
   textInput:{
     width:'90%',
     marginBottom: 8
+  },
+  textInputDesc:{
+    width:'90%',
+    marginBottom: 30
   },
   title: {
     textAlign: "center",    
@@ -283,32 +323,15 @@ const styles = StyleSheet.create({
   ImageSections: {
     display: 'flex',
     flexDirection: 'row',
-    marginBottom:18,
+    marginBottom:40,
   },
   images: {
-    width: 120,
-    height: 120,
+    width: 180,
+    height: 180,
     marginBottom: 10,
   },
   btnParentSection: {
     flexDirection: "row"
-  },
-  btnSection1: {
-    width: 160,
-    height: 50,
-    borderRadius: 3,
-    marginRight:5,
-    textAlign: "center",
-    borderColor:"#ED1C24",
-    backgroundColor: "#ED1C24"
-  },
-  btnSection2: {
-    width: 160,
-    height: 50,
-    borderRadius: 3,
-    textAlign: "center",
-    borderColor:"#ED1C24",
-    backgroundColor: "#ED1C24"
   },
   inputPV: {
     width:'90%',
@@ -316,6 +339,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     borderColor: "#141414",
     backgroundColor:"#292929",
+    color: '#FFFFFF'
   }
 
 });

@@ -1,33 +1,36 @@
-import React, { useState} from "react";
+import React, { useState, useEffect} from "react";
 import { Alert, StyleSheet, Modal, View} from "react-native";
-import {  Button, Text} from '@ui-kitten/components';
+import {  Button, Text, Icon} from '@ui-kitten/components';
 import firebase from 'react-native-firebase';
-import { Card, CardTitle, CardContent, CardAction, CardButton, CardImage } from 'react-native-material-cards'
-import SelectOperator from "./SelectOperator";
+import { Card, CardTitle, CardContent, CardAction, CardButton, CardImage } from 'react-native-material-cards';
+import DatePicker from 'react-native-datepicker';
 import Select2 from "react-native-select-two";
-import DatePicker from 'react-native-datepicker'
-
 
 
 function Todo({ id, titulo, estado, descripcion, puntoVenta, fecha, imagen}) {
    const [ modalVisible, setModalVisible] = useState(false);
-   const [ stateTicket ] = useState('ASIGNADO')
-   const [ date, setDate, dueDate, setDueDate ] = useState('')
-   const [ operators, setOperators] = useState([])
-   const [ today ] = useState('10/3/2020')
-  
-   async function toggleOperators() {
-      await firebase.firestore().collection('Users').where("rol", "==", "OPERARIO").get().then((snapshot) => (
-          snapshot.forEach((doc) => (
-          setOperators((prevState) => ({
-            operators: [...prevState.operators, {
-                id: doc.id,
-                name: doc.data().nombre + ' ' + doc.data().apellido,
-            }]
-          }))
-        ))
-      ));
-   }
+   const [ stateTicket ] = useState('ASIGNADO');
+   const [ todos, setTodos ] = useState([]);
+   const [ changeOperators, setChangeOperators ] = useState('');
+   const [ dueDate, setDueDate ] = useState('');
+   const [ dateTicket, setDateTicket  ] = useState('');
+   const ref = firebase.firestore().collection('Users').where("rol", "==", "OPERARIO");
+
+
+   useEffect(() => {
+      return ref.onSnapshot(querySnapshot => {
+         const list = [];
+         querySnapshot.forEach(doc => {
+            list.push({
+               id: doc.data().nombre + ' ' + doc.data().apellido,
+               name: doc.data().nombre + ' ' + doc.data().apellido
+            });
+         });
+   
+         setTodos(list);
+         
+      });
+   });
 
    async function toggleComplete() {
     await firebase.firestore()
@@ -47,6 +50,9 @@ function Todo({ id, titulo, estado, descripcion, puntoVenta, fecha, imagen}) {
       setModalVisible({modalVisible: visible});
    }
 
+   const CloseIcon = (style) => (
+      <Icon {...style} name='close-outline'/>
+   );
    const assignOperator = () => {
       firebase.firestore()
       .collection('Casos')
@@ -58,7 +64,9 @@ function Todo({ id, titulo, estado, descripcion, puntoVenta, fecha, imagen}) {
          fecha: fecha,
          imagen: imagen,
          estado: stateTicket,
-         fechafin: dueDate
+         fecha_asignado: dateTicket,
+         fecha_fin_asignado: dueDate,
+         asignado_a: changeOperators
       })
    }
    
@@ -73,29 +81,55 @@ function Todo({ id, titulo, estado, descripcion, puntoVenta, fecha, imagen}) {
             onRequestClose={() => {
                Alert.alert('Modal has been closed.');
             }}>
+               <View style={styles.containerCloseButton}>
+                  <Button 
+                     onPress={() => {
+                        setModalVisible(!modalVisible);
+                     }}
+                     style={styles.buttonClose}
+                     size="large"
+                     icon={CloseIcon}
+                  >
+                  </Button>
+               </View>
+               
                <View style={styles.containerTextTitle}>
-                  <Text style={styles.textTitle} category='h4'>{titulo + ' en ' + puntoVenta}</Text>
+                 
                   <Text style={styles.textTitle} category='h6'>{estado + ' el ' + fecha}</Text>
                </View>
 
                <View style={styles.containerOperator}>
+                  <Select2
+                     isSelectSingle
+                     style={styles.inputPV}
+                     colorTheme="#FFD100"
+                     popupTitle="Seleccione un operario"
+                     searchPlaceHolderText="Busque al operario por nombre"
+                     listEmptyTitle="No se encontró este operario"
+                     selectButtonText="Aceptar"
+                     cancelButtonText="Cancelar"
+                     title="Operario"
+                     data={todos}
+                     onSelect={(setTodos) => setChangeOperators(setTodos)}
+                     onRemoveItem={(setTodos) => setChangeOperators(setTodos)}
+
+                  />
                   <DatePicker
                      style={styles.datePickerAsign}
-                     date={date}
+                     date={dateTicket}
                      showIcon={false}
                      mode="date"
                      placeholder="Fecha de apertura"
-                     format="DD-MM-YYYY"
-                     minDate="01-01-2020"
-                     maxDate="01-01-2100"
-                     confirmBtnText="Confirm"
-                     cancelBtnText="Cancel"
+                     format="YYYY-MM-DD"
+                     minDate="2020-01-01"
+                     maxDate="2100-01-01"
                      customStyles={{
                         dateInput: {
-                        borderRadius: 5
+                        borderRadius: 5,
+                        textAlign:'start'
                         }
                      }}
-                     onDateChange={(date) => setDate(date)}
+                     onDateChange={(dateTicket) => setDateTicket(dateTicket)}
                   />
                   <DatePicker
                      style={styles.datePickerAsignClose}
@@ -103,11 +137,9 @@ function Todo({ id, titulo, estado, descripcion, puntoVenta, fecha, imagen}) {
                      showIcon={false}
                      mode="date"
                      placeholder="Fecha de cierre"
-                     format="DD-MM-YYYY"
-                     minDate="01-01-2020"
-                     maxDate="01-01-2100"
-                     confirmBtnText="Confirm"
-                     cancelBtnText="Cancel"
+                     format="YYYY-MM-DD"
+                     minDate="2020-01-01"
+                     maxDate="2100-01-01"
                      customStyles={{
                         dateInput: {
                         borderRadius: 5
@@ -118,15 +150,6 @@ function Todo({ id, titulo, estado, descripcion, puntoVenta, fecha, imagen}) {
                   <Button style={styles.buttonTicket} onPress={assignOperator}>
                      Asignar Caso
                   </Button>
-                  <Button 
-                     onPress={() => {
-                        setModalVisible(!modalVisible);
-                     }}
-                     style={styles.buttonClose}
-                     size="large"
-                  >
-                     Cerrar
-                  </Button>
                </View>
             </Modal>
             
@@ -134,7 +157,8 @@ function Todo({ id, titulo, estado, descripcion, puntoVenta, fecha, imagen}) {
                title={titulo + ' en ' + puntoVenta} 
                subtitle={estado + ' el ' + fecha }
             />
-            <CardContent text={descripcion} />
+            <CardContent 
+               text={descripcion} />
             <CardAction 
                inColumn={false}
                style={styles.actionCard}
@@ -184,11 +208,15 @@ const styles = StyleSheet.create({
       fontSize: 50,
       marginTop: 50
    },
+   containerCloseButton:{
+      alignItems: "center",
+      paddingTop: 40
+   },
    buttonClose: {
-      width: '90%',
-      textAlign:'center',
-      fontSize: 50,
-      marginTop: 10
+      height: 50,
+      width: 50, 
+      borderRadius:400,
+      justifyContent: 'center'
    },
    inputPV: {
       width:'90%',
@@ -201,6 +229,7 @@ const styles = StyleSheet.create({
    datePickerAsign: {
       borderRadius: 15,
       width: '90%',
+      justifyContent:'flex-end'
    },
    datePickerAsignClose: {
       width: '90%',

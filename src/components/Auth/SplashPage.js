@@ -1,16 +1,21 @@
-import React from 'react';
+import React, {Component} from 'react';
 import {View, StyleSheet, Image} from 'react-native';
 import firebase from 'react-native-firebase';
 
-export default class SplashPage extends React.Component {
+class SplashPage extends Component {
 
   componentDidMount() {
     setTimeout(() => {
       firebase.auth().onAuthStateChanged(user => {
         this.props.navigation.navigate(user ? 'Home' : 'Login');
       });
-    }, 2000);
+    }, 1500);
   }
+
+  componentWillUnmount() {
+    firebase.auth().onAuthStateChanged((user));
+  }
+
   render() {
     return (
       <View style={styles.container}>
@@ -32,3 +37,5 @@ const styles = StyleSheet.create({
     height: 160
  }
 });
+
+export default SplashPage;

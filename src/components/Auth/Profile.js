@@ -5,11 +5,29 @@ import {Button, Text, Layout} from '@ui-kitten/components'
 import firebase from 'react-native-firebase';
 
 class Profile extends Component{
+
+   state = { 
+      currentUser: null,
+      items: [] 
+   }
+
+   componentDidMount() {
+      const { currentUser } = firebase.auth()
+      this.setState({ currentUser })
+      const { uid } = firebase.auth().currentUser.uid;
+   }
+
    render() {
+      const {currentUser} = this.state;
       return(
-         <Button style={styles.buttonLogin} onPress={() => firebase.auth().signOut()}>
-            Cerrar Sesión
-         </Button>
+         <Layout style={styles.container}>
+            <Text style={styles.textUser} category='h3'>
+            {currentUser && currentUser.email}
+            </Text>
+            <Button style={styles.buttonLogin} onPress={() => firebase.auth().signOut()}>
+               Cerrar Sesión
+            </Button>
+         </Layout>
       );
    }
 }
@@ -26,7 +44,9 @@ const styles = StyleSheet.create({
       fontSize: 50,
       marginTop: 30
    },
-
+   textUser:{
+      color: '#ffffff',
+   }
 });
 
 export default Profile;
